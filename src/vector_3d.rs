@@ -86,6 +86,10 @@ impl Vector3D {
     pub fn length_squared(&self) -> f64 {
         return self.x * self.x + self.y * self.y + self.z * self.z;
     }
+
+    pub fn near_zero(&self) -> bool {
+        self.x.abs() < f64::EPSILON && self.y.abs() < f64::EPSILON && self.z.abs() < f64::EPSILON
+    }
 }
 
 impl Add for Vector3D {

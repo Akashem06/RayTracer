@@ -1,10 +1,18 @@
+use std::fs::File;
+
 use serde::{Deserialize, Serialize};
 
+use palette::Pixel;
 use palette::Srgb;
 
+use image::ColorType;
+use image::png::PNGEncoder;
+
+use crate::anti_aliasing::AntiAliasing;
 use crate::ray::Ray;
 use crate::vector_3d::Vector3D;
 use crate::world::World;
+use crate::material::Scatterable;
 
 #[cfg(test)]
 use assert_approx_eq::assert_approx_eq;
@@ -29,7 +37,7 @@ pub struct Camera {
     vertical_fov: f64, // vertical field-of-view in degrees
     vector_up: Vector3D,
     look_from: Vector3D,
-    look_at: Vector3D
+    look_at: Vector3D,
 }
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize)]
@@ -103,24 +111,25 @@ impl Camera {
         if depth <= 0 {
             return Srgb::new(0.0, 0.0, 0.0);
         }
-    
+
         let hit = world.hit(ray, 0.001, std::f64::MAX);
         match hit {
             Some(hit_record) => {
-                let target = hit_record.point + hit_record.normal + Vector3D::random_in_unit_sphere();
-    
-                // Recursively call the target color with less depth
-                let target_color = self.ray_color(
-                    &Ray::new(hit_record.point, target - hit_record.point),
-                    world,
-                    depth - 1,
-                );
-    
-                return Srgb::new(
-                    0.5 * target_color.red,
-                    0.5 * target_color.green,
-                    0.5 * target_color.blue,
-                );
+                let scattered = hit_record.material.scatter(ray, &hit_record);
+
+                match scattered {
+                    Some((scattered_ray, albedo)) => {
+                        let target_color = self.ray_color(&scattered_ray, world, depth - 1);
+                        return Srgb::new(
+                            albedo.red * target_color.red,
+                            albedo.green * target_color.green,
+                            albedo.blue * target_color.blue,
+                        );
+                    }
+                    None => {
+                        return Srgb::new(0.0, 0.0, 0.0);
+                    }
+                }
             }
             None => {
                 let t: f32 = 0.5 * (ray.direction.unit_vector().get_y() as f32 + 1.0);
@@ -131,6 +140,37 @@ impl Camera {
                 );
             }
         }
+    }
+
+    pub fn render(&self, world: &World, anti_aliasing: &AntiAliasing) -> Vec<u8> {
+        let mut pixels = vec![0; self.image_width * self.image_height * 3];
+
+        for y in 0..self.image_height {
+            for x in 0..self.image_width {
+                let color = anti_aliasing.anti_alias(x, y, self, world);
+
+                let i = y * self.image_width + x;
+                let pixel: [u8; 3] = color.into_format().into_raw();
+                pixels[i * 3] = pixel[0];
+                pixels[i * 3 + 1] = pixel[1];
+                pixels[i * 3 + 2] = pixel[2];
+            }
+        }
+
+        return pixels;
+    }
+
+    pub fn write_image(
+        &self,
+        filename: &str,
+        pixels: &[u8],
+        width: usize,
+        height: usize,
+    ) -> Result<(), std::io::Error> {
+        let output = File::create(filename)?;
+        let encoder = PNGEncoder::new(output);
+        encoder.encode(pixels, width as u32, height as u32, ColorType::RGB(8))?;
+        Ok(())
     }
 }
 
