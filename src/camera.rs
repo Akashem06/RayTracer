@@ -9,10 +9,10 @@ use image::ColorType;
 use image::png::PNGEncoder;
 
 use crate::anti_aliasing::AntiAliasing;
+use crate::material::Scatterable;
 use crate::ray::Ray;
 use crate::vector_3d::Vector3D;
 use crate::world::World;
-use crate::material::Scatterable;
 
 #[cfg(test)]
 use assert_approx_eq::assert_approx_eq;

@@ -11,3 +11,13 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_with = "1.9.4"
 rand = "0.8.4"
+
+[dependencies.portable-simd]
+package = "std_float"
+git = "https://github.com/rust-lang/portable-simd"
+branch = "master"
+optional = true
+
+[features]
+acceleration = ["simd"]
+simd = []

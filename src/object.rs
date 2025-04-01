@@ -1,6 +1,6 @@
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vector_3d::Vector3D;
-use crate::material::Material;
 
 pub struct ObjectHitRecord<'material> {
     pub t: f64,

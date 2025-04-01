@@ -1,7 +1,7 @@
+use crate::material::Material;
 use crate::object::{Object, ObjectHitRecord};
 use crate::ray::Ray;
 use crate::vector_3d::Vector3D;
-use crate::material::Material;
 
 #[cfg(test)]
 use assert_approx_eq::assert_approx_eq;
@@ -17,7 +17,7 @@ impl Sphere {
         return Sphere {
             center: center,
             radius: radius,
-            material: material
+            material: material,
         };
     }
 }
@@ -49,7 +49,7 @@ impl Object for Sphere {
                     point: intersect_point,
                     normal: if front_face { normal } else { -normal },
                     front_face: front_face,
-                    material: &self.material
+                    material: &self.material,
                 });
             }
         }

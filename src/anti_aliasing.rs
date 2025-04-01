@@ -59,7 +59,8 @@ impl AntiAliasing {
             // Default case (Including the None option)
             _ => {
                 let u = (x as f64) / (camera.image_width as f64 - 1.0);
-                let v = ((camera.image_height as f64) - (y as f64)) / (camera.image_height as f64 - 1.0);
+                let v = ((camera.image_height as f64) - (y as f64))
+                    / (camera.image_height as f64 - 1.0);
                 let r = camera.get_ray(u, v);
                 color = camera.ray_color(&r, &world, 50);
             }

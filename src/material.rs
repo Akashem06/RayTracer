@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 
 use palette::Srgb;
 
-use crate::vector_3d::Vector3D;
 use crate::object::ObjectHitRecord;
 use crate::ray::Ray;
+use crate::vector_3d::Vector3D;
 
 // https://docs.rs/serde_with/1.9.4/serde_with/macro.serde_conv.html
 serde_with::serde_conv!(
@@ -34,7 +34,7 @@ impl Scatterable for Material {
     fn scatter(&self, ray: &Ray, hit_record: &ObjectHitRecord) -> Option<(Ray, Srgb)> {
         match self {
             Material::Lambertian(l) => l.scatter(ray, hit_record),
-            Material::Metal(m) => m.scatter(ray, hit_record)
+            Material::Metal(m) => m.scatter(ray, hit_record),
         }
     }
 }
@@ -42,14 +42,12 @@ impl Scatterable for Material {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Lambertian {
     #[serde(with = "SrgbAsArray")]
-    pub albedo: Srgb
+    pub albedo: Srgb,
 }
 
 impl Lambertian {
     pub fn new(albedo: Srgb) -> Lambertian {
-        return Lambertian {
-            albedo: albedo
-        }
+        return Lambertian { albedo: albedo };
     }
 }
 
@@ -68,20 +66,19 @@ impl Scatterable for Lambertian {
     }
 }
 
-
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Metal {
     #[serde(with = "SrgbAsArray")]
     pub albedo: Srgb,
-    pub roughness: f64
+    pub roughness: f64,
 }
 
 impl Metal {
     pub fn new(albedo: Srgb, roughness: f64) -> Metal {
         return Metal {
             albedo: albedo,
-            roughness: roughness
-        }
+            roughness: roughness,
+        };
     }
 }
 
@@ -97,6 +94,5 @@ impl Scatterable for Metal {
         } else {
             None
         }
-
     }
 }
